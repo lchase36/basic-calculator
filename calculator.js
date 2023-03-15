@@ -30,35 +30,48 @@ function getDigit() {
 	let text = this.textContent;
 	if (pendingOperation === '') {
 		if (hasDecimal(firstNumString) && text === '.') return;
+		firstNumString = firstNumString.slice(0,10) 
 		firstNumString += text;
 		updateScreen(firstNumString);
 	} else {
-		if (hasDecimal(secondNumString)) return;
+		if (hasDecimal(secondNumString) && text === '.') return;
+		secondNumString = secondNumString.slice(0,10) 
 		secondNumString += text;
 		updateScreen(secondNumString);
 	}
 }
 
 function convertSign() {
-	console.log('click!');
 	if (pendingOperation === '') {
 		if(firstNumString.includes('-')) {
 			firstNumString = firstNumString.replace('-','');
 		} else {
-			firstNumString = '-' + firstNumString;
+			firstNumString = '-' + firstNumString.slice(0,10);
 		}
 		updateScreen(firstNumString);
 	} else {
 		if(secondNumString.includes('-')) {
 			secondNumString = secondNumString.replace('-','');
 		} else {
-			secondNumString = '-' + secondNumString;
+			secondNumString = '-' + secondNumString.slice(0,10);
 		}
 		updateScreen(secondNumString);
 	}
-	console.table({firstNumString, secondNumString});
 }
 
+function roundLongResult(resultString) {
+	if (resultString.length <= 11) return resultString;
+	
+	let resultArray = resultString.split('.');
+	console.log(resultArray[0].length)
+	if (resultArray.length === 2 && resultArray[0].length <= 9) {
+		//Identify decimal place to round
+		let zeroCount = 10 - resultArray[0].length;
+		return Math.round(parseFloat(resultString)*10**(zeroCount))/10**(zeroCount);
+	} else {
+		return parseFloat(resultString).toExponential(3);
+	}
+}
 
 function doOperation() {
 	let tempOperation = this.textContent;
@@ -96,15 +109,7 @@ function doOperation() {
 			}
 	}
 	secondNumString = '';
-	updateScreen(firstNumString);
-	console.table({
-		firstNumString,
-		secondNumString,
-		firstNumVal,
-		secondNumVal,
-		pendingOperation,
-		tempOperation,
-	});
+	updateScreen(roundLongResult(firstNumString));
 }
 
 digits.forEach((digit) => {
